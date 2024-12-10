@@ -1,0 +1,127 @@
+﻿
+@model IEnumerable<CRUDWITHEF.Models.EMPLOYEEMASTER>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.EMPCODE)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.EMPNAME)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DESIGNATION)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.SALARY)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.EMPCODE)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EMPNAME)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DESIGNATION)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SALARY)
+            </td>
+            <td>
+
+                @Html.ActionLink("Edit", "Edit", new { id = item.ID }) |
+                <i class="bi bi-pencil-square"></i>
+                @Html.ActionLink("Details", "Details", new { id = item.ID }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.ID })
+            </td>
+        </tr>
+    }
+
+</table>
+
+
+@{
+    ViewBag.Title = "Search Employees";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Search Employees by Salary</h2>
+
+<label for="salaryInput">Enter Salary:</label>
+<input type="text" id="salaryInput" name="salaryInput" />
+<button id="searchBtn">Search</button>
+<p id="errorMessage" style="color: red;"></p>
+<ul id="employeeList"></ul>
+<table id="employeeTable" border="1" style="width:100%">
+    <thead>
+        <tr>
+            <th>Emp Code</th>
+            <th>Emp Name</th>
+            <th>Designation</th>
+            <th>Salary</th>
+        </tr>
+    </thead>
+    <tbody id="employeeTableBody">
+    </tbody>
+</table>
+
+<div id="errorMessage"></div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#searchBtn').click(function (e) {
+                e.preventDefault();
+                var salaryInput = $('#salaryInput').val();
+                $('#employeeList').empty();
+                $('#errorMessage').text('');
+
+                $.ajax({
+                    url: '/EMPLOYEEMASTERs/SearchBySalary?salary=' + salaryInput,
+                    type: 'GET',
+                    success: function (response) {
+                        if (response.success) {
+                            $('#employeeTableBody').empty();
+                            if (response.employees.length > 0) {  $.each(response.employees, function (index, employee) {
+                                var row = '<tr>' +
+                                    '<td>' + employee.EMPCODE + '</td>' +
+                                    '<td>' + employee.EMPNAME + '</td>' +
+                                    '<td>' + employee.DESIGNATION + '</td>' +
+                                    '<td>$' + employee.SALARY + '</td>' +
+                                    '</tr>';
+                                $('#employeeTableBody').append(row);
+                            });
+                            } else {
+                                $('#employeeTableBody').append('<tr><td colspan="4">No employees found with a salary less than or equal to ' + salaryInput + '.</td></tr>');
+                            }
+                        } else {
+                            $('#errorMessage').text(response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $('#errorMessage').text('Error: ' + xhr.responseText);
+                        console.log(xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+ }
